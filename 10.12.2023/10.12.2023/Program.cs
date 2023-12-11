@@ -6,7 +6,7 @@
         public bool part, inside;
         public bool left,top;
         public Tile(char c)
-        {
+        { 
             this.c = c;
             part = false;
             top = false;
@@ -260,6 +260,7 @@
                         if (map[j][xC].part)
                             isBottom = false;
                     }
+
                     bool deleting = true;
                     while (deleting) 
                     {
