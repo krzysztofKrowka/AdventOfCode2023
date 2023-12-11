@@ -6,11 +6,13 @@ namespace _11._12._2023
     {
         public int x; public int y;
         public bool galaxy;
+        public bool expanding;
         public Tile(int x, int y, bool galaxy)
         {
             this.x = x;
             this.y = y;
             this.galaxy = galaxy;
+            this.expanding = false;
         }
     }
     internal class Program
@@ -18,6 +20,7 @@ namespace _11._12._2023
         static void Main(string[] args)
         {
             List<List<char>> tiles = new List<List<char>>();
+            List<string> expanding = new List<string>();
             string input;
             int y = 0;
             while ((input = Console.ReadLine()) != "")
@@ -26,7 +29,6 @@ namespace _11._12._2023
                 int x = 0;
                 foreach (var c in input)
                 {
-                    bool galaxy = c == '#';
                     tiles[y].Add(c);
                     x++;
                 }
@@ -38,22 +40,16 @@ namespace _11._12._2023
                 var l = tiles[i];
                 if (!l.Contains('#'))
                 {
-                    tiles.Insert(i, new List<char>());
-                    i++;
+                    int x = 0;
+                    foreach (var item in l)
+                    {
+                        expanding.Add(i + "-" + x);
+                        x++;
+                    }
                 }
                
             }
-            y = 0;
-            foreach (var l in tiles)
-            {
-                if (l.Count == 0)
-                {
-                    foreach (var t in tiles[0])
-                    {
-                        l.Add('.');
-                    }
-                }
-            }
+
             for (int j = 0; j < tiles[0].Count; j++)
             {
                 int x = 0;
@@ -68,9 +64,8 @@ namespace _11._12._2023
                 {
                     for (int i = 0; i < tiles.Count; i++)
                     {
-                       tiles[i].Insert(j,'.');
+                        expanding.Add(i + "-" + j);
                     }
-                    j++;
                 }
             }
 
@@ -93,14 +88,54 @@ namespace _11._12._2023
                 }
                 y++;
             }
+            
+            foreach(var e in expanding)
+            {
+                var split = e.Split('-');
+                map[int.Parse(split[0])][int.Parse(split[1])].expanding = true;
+            }
+            
             BigInteger sum = 0;
             for (int i = galaxies.Count-1; i >= 0  ; i--)
             {
                 var galaxy = galaxies[i];
                 for (int j = 0; j < i; j++)
                 {
+                    int gX,gY,sX,sY;
                     var secondGalaxy = galaxies[j];
-                    sum += Math.Abs(galaxy.y - secondGalaxy.y) + Math.Abs(galaxy.x - secondGalaxy.x);
+                    gX = galaxy.x; gY = galaxy.y;
+                    sX = secondGalaxy.x; sY = secondGalaxy.y;
+                    BigInteger finalY = 0;
+                    for(int k = gY-1;k >= sY; k--)
+                    {
+                        finalY++;
+                        if (map[k][gX].expanding)
+                        {
+                            finalY += 999999;
+                        }
+                    }
+                    BigInteger finalX = 0;
+                    if (gX > sX)
+                    {
+                        for (int k = gX-1; k >= sX; k--)
+                        {
+                            if (map[gY][k].expanding)
+                            {
+                                finalX += 999999;
+                            }
+                            finalX++;
+                        }
+                    }
+                    else
+                    {
+                        for (int k = gX+1; k <= sX; k++)
+                        {
+                            if (map[gY][k].expanding)
+                                finalX += 999999;
+                            finalX++;
+                        }
+                    }
+                    sum += finalY + finalX;
                 }
             }
             Console.WriteLine(sum);
